@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menú Zibatá 2026</title>
+  <meta name="description" content="Menú de alimentos y bebidas 2026 del Hotel y Restaurante Zibatá — Lugar en la cima del valle.">
+  <meta name="theme-color" content="#3b2a1f">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alice&family=Arapey:ital@0;1&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --papel: #fdfcf8;
+      --tinta: #2a2420;
+      --tinta-suave: #6b6058;
+      --naranja: #e8821e;
+      --naranja-oscuro: #c96a0c;
+      --verde: #4f8a2b;
+      --oliva: #3d4a2a;
+      --gris-papel: #e9eaec;
+      --sombra: 0 18px 40px rgba(0, 0, 0, .45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Arapey", Georgia, serif;
+      color: var(--tinta);
+      background: #3b2a1f url("assets/madera.jpg") center / cover fixed;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+    }
+
+    .hoja {
+      position: relative;
+      width: 100%;
+      max-width: 860px;
+      background: var(--papel);
+      box-shadow: var(--sombra);
+      padding: 48px 48px 40px;
+      text-align: center;
+    }
+
+    .logo {
+      display: block;
+      width: min(420px, 90%);
+      margin: 0 auto;
+    }
+
+    .titulo {
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+      font-size: clamp(3rem, 9vw, 4.5rem);
+      line-height: 1.1;
+      margin-top: 18px;
+    }
+
+    .subtitulo {
+      font-family: "Alice", serif;
+      letter-spacing: .5em;
+      text-transform: uppercase;
+      font-size: .8rem;
+      color: var(--naranja-oscuro);
+      margin-top: 6px;
+      padding-left: .5em;
+    }
+
+    .menus {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .portada {
+      width: 100%;
+      aspect-ratio: 595 / 842;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .portada img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .menu:hover .portada,
+    .menu:focus-visible .portada {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 32px rgba(0, 0, 0, .3);
+    }
+
+    .menu h2 {
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+      font-size: 2.6rem;
+      margin-top: 18px;
+    }
+
+    .menu p {
+      font-size: 1.1rem;
+      color: var(--tinta-suave);
+      margin-top: 2px;
+    }
+
+    .acciones {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .boton {
+      font-family: "Alice", serif;
+      font-size: .95rem;
+      letter-spacing: .08em;
+      text-decoration: none;
+      padding: 10px 22px;
+      border: 2px solid currentColor;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    .boton.principal { background: var(--naranja); border-color: var(--naranja); color: #fff; }
+    .boton.principal:hover { background: var(--naranja-oscuro); border-color: var(--naranja-oscuro); }
+    .boton.secundario { color: var(--verde); }
+    .boton.secundario:hover { background: var(--verde); color: #fff; }
+
+    .bebidas .boton.principal { background: var(--oliva); border-color: var(--oliva); }
+    .bebidas .boton.principal:hover { background: #2a3420; border-color: #2a3420; }
+
+    .divisor {
+      font-family: "Great Vibes", cursive;
+      font-size: 1.6rem;
+      color: var(--verde);
+      margin: 40px 0 6px;
+    }
+
+    .divisor::before,
+    .divisor::after {
+      content: "";
+      display: inline-block;
+      width: 60px;
+      height: 1px;
+      background: currentColor;
+      vertical-align: middle;
+      margin: 0 14px;
+      opacity: .6;
+    }
+
+    footer {
+      font-size: 1rem;
+      color: var(--tinta-suave);
+      font-style: italic;
+    }
+
+    .decoracion {
+      position: absolute;
+      pointer-events: none;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .25));
+    }
+    .decoracion.uno { width: 120px; top: 24px; left: -40px; }
+    .decoracion.dos { width: 120px; bottom: 20px; right: -44px; }
+
+    @media (max-width: 720px) {
+      body { padding: 20px 16px; background-attachment: scroll; }
+      .hoja { padding: 32px 20px 28px; }
+      .menus { grid-template-columns: 1fr; gap: 40px; }
+      .portada { max-width: 300px; }
+      .decoracion { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="hoja">
+    <img class="decoracion uno" src="assets/platillo-1.png" alt="">
+    <img class="decoracion dos" src="assets/platillo-2.png" alt="">
+
+    <img class="logo" src="assets/logo.png" alt="Hotel y Restaurante Zibatá — Lugar en la cima del valle">
+
+    <h1 class="titulo">Menú 2026</h1>
+    <p class="subtitulo">Bienvenidos</p>
+
+    <section class="menus">
+      <div class="menu comida">
+        <a class="portada" href="MENU%20ZIBATA%202026.pdf" target="_blank" rel="noopener" aria-label="Abrir menú de alimentos">
+          <img src="assets/portada-comida.jpg" alt="Portada del menú de alimentos Zibatá 2026">
+        </a>
+        <h2>Alimentos</h2>
+        <p>Para compartir, desayunos y platos fuertes</p>
+        <div class="acciones">
+          <a class="boton principal" href="MENU%20ZIBATA%202026.pdf" target="_blank" rel="noopener">Ver menú</a>
+          <a class="boton secundario" href="MENU%20ZIBATA%202026.pdf" download="Menu-Zibata-2026.pdf">Descargar</a>
+        </div>
+      </div>
+
+      <div class="menu bebidas">
+        <a class="portada" href="MENU%20DE%20BEBIDAS%202026%20(6).pdf" target="_blank" rel="noopener" aria-label="Abrir menú de bebidas">
+          <img src="assets/portada-bebidas.jpg" alt="Portada del menú de bebidas Zibatá 2026">
+        </a>
+        <h2>Bebidas</h2>
+        <p>Bebidas preparadas y licores espirituosos</p>
+        <div class="acciones">
+          <a class="boton principal" href="MENU%20DE%20BEBIDAS%202026%20(6).pdf" target="_blank" rel="noopener">Ver menú</a>
+          <a class="boton secundario" href="MENU%20DE%20BEBIDAS%202026%20(6).pdf" download="Menu-Bebidas-Zibata-2026.pdf">Descargar</a>
+        </div>
+      </div>
+    </section>
+
+    <p class="divisor">Buen provecho</p>
+    <footer>Hotel y Restaurante Zibatá · Lugar en la cima del valle</footer>
+  </main>
+</body>
+</html>
