@@ -1,0 +1,50 @@
+name: Deploy Zibata Menus
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Evita que dos deploys corran al mismo tiempo si se hacen pushes seguidos
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/null ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" '
+            set -e
+            cd /var/www/zibata-menus
+            git pull --ff-only origin main
+            # npm ci instala exactamente lo del package-lock y no lo modifica,
+            # así el siguiente git pull no falla por cambios locales
+            npm ci --no-audit --no-fund
+            npm run build
+            # -n: falla de inmediato si sudo pide contraseña en vez de quedarse colgado
+            sudo -n systemctl restart zibata-menus
+            sleep 2
+            systemctl is-active --quiet zibata-menus
+          '
+
+      - name: Clean up
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
