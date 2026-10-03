@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/index.js",
+    "start": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/index.js",
+    "setup": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/setup.js",
+    "reset": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/setup.js --reset"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

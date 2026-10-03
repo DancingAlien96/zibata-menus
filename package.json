@@ -1,0 +1,21 @@
+{
+  "name": "zibata-menus",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "db:setup": "npm run setup --workspace server",
+    "db:reset": "npm run reset --workspace server",
+    "dev": "npm run setup -w server && concurrently -n api,web -c yellow,green \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm run setup -w server && npm start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "overrides": {
+    "baseline-browser-mapping": "2.11.26"
+  }
+}
