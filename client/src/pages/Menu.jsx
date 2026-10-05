@@ -23,8 +23,8 @@ export default function Menu() {
   const categorias = menu?.categorias.filter((c) => c.platillos.length) ?? []
 
   return (
-    <div className={slug === 'bebidas' ? 'fondo-oliva' : 'fondo-madera'}>
-      <main className={`hoja carta ${slug === 'bebidas' ? 'papel-gris' : ''}`}>
+    <div className="fondo">
+      <main className="hoja carta">
         <header className="carta-encabezado">
           <Link to="/" aria-label="Volver al inicio">
             <img className="logo-chico" src="/assets/logo.png" alt="Zibatá" />

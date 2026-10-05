@@ -24,7 +24,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="fondo-madera">
+    <div className="fondo">
       <main className="hoja login">
         <img className="logo" src="/assets/logo.png" alt="Zibatá" />
         <h1 className="titulo-script">Administración</h1>
