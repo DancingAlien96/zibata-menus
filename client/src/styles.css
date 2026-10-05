@@ -333,6 +333,82 @@ button { cursor: pointer; background: none; border: 0; }
 
 .carta .pie { margin-top: 52px; }
 
+/* Foto del platillo: miniatura en la lista y visor al tocarla */
+.platillo.con-foto { display: flex; align-items: center; gap: 14px; }
+.platillo .texto { flex: 1; min-width: 0; }
+
+.foto-mini {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--oro);
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(31, 48, 12, .18);
+  transition: transform .2s ease;
+}
+.foto-mini:hover, .foto-mini:focus-visible { transform: scale(1.06); }
+.foto-mini img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 25, 5, .82);
+  backdrop-filter: blur(4px);
+}
+.visor-marco {
+  position: relative;
+  width: min(640px, 100%);
+  background: var(--crema);
+  border: 2px solid var(--verde-oscuro);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: var(--sombra);
+}
+.visor-marco img {
+  display: block;
+  width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fffdf3;
+}
+.visor-marco figcaption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 8px;
+  text-align: center;
+}
+.visor-marco strong {
+  font-family: "Alice", serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--verde-oscuro);
+}
+.visor-marco figcaption span { font-weight: 700; color: var(--verde-oscuro); font-size: 1.15rem; }
+.visor-marco em { color: var(--tinta-suave); }
+.visor-cerrar {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--verde-oscuro);
+  color: var(--crema);
+  font-size: 1.5rem;
+  line-height: 1;
+  border: 2px solid var(--oro-claro);
+}
+
 /* ---------- Login ---------- */
 
 .login { max-width: 440px; }
@@ -409,7 +485,7 @@ button { cursor: pointer; background: none; border: 0; }
 .tabla-cabecera,
 .fila {
   display: grid;
-  grid-template-columns: minmax(200px, 3fr) minmax(140px, 2fr) 105px 115px 80px 130px;
+  grid-template-columns: 64px minmax(180px, 3fr) minmax(130px, 2fr) 105px 115px 80px 130px;
   gap: 10px;
   align-items: center;
 }
@@ -476,6 +552,36 @@ button { cursor: pointer; background: none; border: 0; }
 .interruptor input:focus-visible + .riel { outline: 2px solid var(--naranja); outline-offset: 2px; }
 .texto-movil { display: none; font-size: .95rem; color: var(--tinta-suave); }
 
+.c-foto { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.c-foto.vacia { width: 56px; height: 56px; border: 1px dashed var(--linea); border-radius: 8px; }
+.foto-subir {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border: 1px dashed var(--oro);
+  border-radius: 8px;
+  background: #fffdf3;
+  cursor: pointer;
+}
+.foto-subir:has(img) { border-style: solid; }
+.foto-subir:hover, .foto-subir:focus-within { border-color: var(--verde); box-shadow: 0 0 0 2px var(--oro-claro); }
+.foto-subir img { width: 100%; height: 100%; object-fit: cover; }
+.foto-subir input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.foto-vacia { font-family: "Alice", serif; font-size: .72rem; color: var(--verde); }
+.foto-cargando {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 253, 243, .8);
+  font-size: 1.4rem;
+  color: var(--verde-oscuro);
+}
+.foto-quitar { font-size: .72rem; padding: 0; }
+
 .boton-texto.agregar { margin-top: 10px; }
 .agregar-categoria { margin-top: 24px; }
 .cambiar-password { display: block; margin-top: 32px; }
@@ -503,6 +609,7 @@ button { cursor: pointer; background: none; border: 0; }
     grid-template-columns: 1fr 1fr;
     padding: 12px 4px;
   }
+  .fila .c-foto { grid-column: 1 / -1; flex-direction: row; gap: 12px; }
   .fila .c-nombre { grid-column: 1 / -1; font-size: 1.15rem; }
   .fila .c-desc { grid-column: 1 / -1; }
   .fila input { border-color: var(--linea); background: #fff; }
@@ -532,6 +639,8 @@ button { cursor: pointer; background: none; border: 0; }
 @media (max-width: 420px) {
   .admin-barra .ver-menu { display: none; }
   .platillo .linea { gap: 6px; }
+  .platillo.con-foto { gap: 10px; }
+  .foto-mini { width: 54px; height: 54px; }
   .platillo .precio.doble { padding: 0 6px; }
 }
 

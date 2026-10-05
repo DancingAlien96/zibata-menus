@@ -11,7 +11,7 @@ export function obtenerMenu(slug, { soloDisponibles = true } = {}) {
   )
   const platillos = todos(
     `SELECT p.id, p.categoria_id, p.nombre, p.descripcion, p.precio, p.precio_doble,
-            p.disponible, p.orden, p.actualizado
+            p.disponible, p.orden, p.actualizado, p.foto
        FROM platillos p
        JOIN categorias c ON c.id = p.categoria_id
       WHERE c.menu_id = ? ${soloDisponibles ? 'AND p.disponible = 1' : ''}

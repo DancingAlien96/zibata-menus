@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api, sesion, quetzales } from '../api.js'
+import { api, sesion, quetzales, prepararFoto } from '../api.js'
 
 const MENUS = [
   { slug: 'alimentos', nombre: 'Alimentos' },
@@ -189,6 +189,7 @@ function Categoria({ categoria, platillos, ejecutar, onCambio, onRecargar }) {
 
       <div className="tabla">
         <div className="tabla-cabecera" aria-hidden="true">
+          <span>Foto</span>
           <span>Nombre</span>
           <span>Descripción</span>
           <span>Precio (Q)</span>
@@ -257,6 +258,7 @@ function FilaPlatillo({ platillo, ejecutar, onCambio, onRecargar }) {
       className={`fila ${platillo.disponible ? '' : 'agotado'} ${cambiado ? 'cambiado' : ''}`}
       onSubmit={(e) => { e.preventDefault(); if (cambiado) guardar() }}
     >
+      <FotoPlatillo platillo={platillo} ejecutar={ejecutar} onCambio={onCambio} />
       <CamposPlatillo borrador={borrador} setBorrador={setBorrador} />
       <label className="interruptor" title={platillo.disponible ? 'Disponible' : 'No disponible'}>
         <input type="checkbox" checked={platillo.disponible} onChange={(e) => guardar({ disponible: e.target.checked })} disabled={guardando} />
@@ -280,6 +282,55 @@ function FilaPlatillo({ platillo, ejecutar, onCambio, onRecargar }) {
   )
 }
 
+function FotoPlatillo({ platillo, ejecutar, onCambio }) {
+  const [subiendo, setSubiendo] = useState(false)
+
+  async function elegir(e) {
+    const archivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!archivo) return
+    setSubiendo(true)
+    try {
+      const foto = await prepararFoto(archivo)
+      onCambio(await ejecutar(
+        () => api(`/admin/platillos/${platillo.id}/foto`, { method: 'PUT', archivo: foto }),
+        `Foto de «${platillo.nombre}» guardada`,
+      ))
+    } catch {
+      /* el aviso ya muestra el error */
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
+  async function quitar() {
+    if (!confirm(`¿Quitar la foto de «${platillo.nombre}»?`)) return
+    try {
+      onCambio(await ejecutar(
+        () => api(`/admin/platillos/${platillo.id}/foto`, { method: 'DELETE' }),
+        'Foto eliminada',
+      ))
+    } catch {
+      /* el aviso ya muestra el error */
+    }
+  }
+
+  return (
+    <div className="c-foto">
+      <label className={`foto-subir ${subiendo ? 'subiendo' : ''}`} title={platillo.foto ? 'Cambiar foto' : 'Agregar foto'}>
+        {platillo.foto_mini
+          ? <img src={platillo.foto_mini} alt={`Foto de ${platillo.nombre}`} />
+          : <span className="foto-vacia">+ Foto</span>}
+        {subiendo && <span className="foto-cargando">…</span>}
+        <input type="file" accept="image/*" onChange={elegir} disabled={subiendo} />
+      </label>
+      {platillo.foto && !subiendo && (
+        <button type="button" className="boton-texto peligro foto-quitar" onClick={quitar}>Quitar</button>
+      )}
+    </div>
+  )
+}
+
 function NuevoPlatillo({ categoriaId, ejecutar, onListo, onCancelar }) {
   const [borrador, setBorrador] = useState({ nombre: '', descripcion: '', precio: '', precio_doble: '' })
 
@@ -298,6 +349,7 @@ function NuevoPlatillo({ categoriaId, ejecutar, onListo, onCancelar }) {
 
   return (
     <form className="fila nueva" onSubmit={crear}>
+      <span className="c-foto vacia" title="Podrás agregar la foto después de crear el producto" />
       <CamposPlatillo borrador={borrador} setBorrador={setBorrador} />
       <span />
       <div className="acciones-fila">

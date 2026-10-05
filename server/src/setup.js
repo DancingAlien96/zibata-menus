@@ -1,16 +1,16 @@
 // Crea las tablas, carga el menú inicial y el usuario administrador.
 //   npm run db:setup   -> solo carga datos si la base está vacía
 //   npm run db:reset   -> borra todo el menú y lo vuelve a cargar con los precios originales
-import { readFileSync } from 'node:fs'
+import { mkdirSync, rmSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
-import { db, uno, ejecutar, transaccion, RUTA_DB } from './db.js'
+import { db, uno, ejecutar, transaccion, RUTA_DB, RUTA_FOTOS } from './db.js'
 import { menus } from '../db/seed-data.js'
 
 const reset = process.argv.includes('--reset')
 
 try {
-  db.exec(readFileSync(new URL('../db/schema.sql', import.meta.url), 'utf8'))
+  // Las tablas y migraciones ya se aplicaron al importar db.js
   console.log(`✓ Tablas listas en ${RUTA_DB}`)
 
   transaccion(() => {
@@ -54,6 +54,13 @@ try {
       if (generada) console.log(`  Contraseña generada (guárdala, no se volverá a mostrar): ${password}`)
     }
   })
+
+  if (reset) {
+    // Los platillos ya no existen: sus fotos tampoco deben quedar en disco
+    rmSync(RUTA_FOTOS, { recursive: true, force: true })
+    mkdirSync(RUTA_FOTOS, { recursive: true })
+    console.log('✓ Fotos anteriores eliminadas')
+  }
 } catch (err) {
   console.error('✗ Error preparando la base de datos:', err.message)
   process.exitCode = 1

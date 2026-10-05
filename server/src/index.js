@@ -2,12 +2,17 @@ import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
 import bcrypt from 'bcryptjs'
-import { todos, uno, ejecutar, aPlatillo } from './db.js'
+import { todos, uno, ejecutar, aPlatillo, RUTA_FOTOS } from './db.js'
 import { firmarToken, requiereAdmin } from './auth.js'
 import { obtenerMenu } from './menu.js'
+import { guardarFoto, borrarFoto } from './fotos.js'
 
 const app = express()
 app.use(express.json())
+
+// Cada foto tiene un nombre único, así que el navegador puede guardarla en caché para siempre.
+app.use('/fotos', express.static(RUTA_FOTOS, { maxAge: '365d', immutable: true }))
+app.use('/fotos', (_req, res) => res.status(404).json({ error: 'Foto no encontrada' }))
 
 // Permite usar funciones async en las rutas y mandar los errores al manejador central.
 const ruta = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
@@ -120,12 +125,45 @@ admin.patch('/platillos/:id', (req, res) => {
   res.json(aPlatillo(platillo))
 })
 
-admin.delete('/platillos/:id', (req, res) => {
-  if (!ejecutar('DELETE FROM platillos WHERE id = ?', id(req.params.id)).changes) {
-    throw new ErrorHttp(404, 'Platillo no encontrado')
-  }
+admin.delete('/platillos/:id', ruta(async (req, res) => {
+  const fila = uno('DELETE FROM platillos WHERE id = ? RETURNING foto', id(req.params.id))
+  if (!fila) throw new ErrorHttp(404, 'Platillo no encontrado')
+  await borrarFoto(fila.foto)
   res.status(204).end()
-})
+}))
+
+// La foto llega como el cuerpo crudo de la petición (Content-Type: image/...).
+admin.put('/platillos/:id/foto', express.raw({ type: 'image/*', limit: '15mb' }), ruta(async (req, res) => {
+  const platilloId = id(req.params.id)
+  const anterior = uno('SELECT foto FROM platillos WHERE id = ?', platilloId)
+  if (!anterior) throw new ErrorHttp(404, 'Platillo no encontrado')
+  if (!Buffer.isBuffer(req.body) || !req.body.length) throw new ErrorHttp(400, 'No se recibió ninguna imagen')
+
+  let nombre
+  try {
+    nombre = await guardarFoto(req.body, platilloId)
+  } catch {
+    throw new ErrorHttp(400, 'El archivo no es una imagen válida')
+  }
+  const platillo = uno(
+    "UPDATE platillos SET foto = ?, actualizado = datetime('now') WHERE id = ? RETURNING *",
+    nombre, platilloId,
+  )
+  await borrarFoto(anterior.foto)
+  res.json(aPlatillo(platillo))
+}))
+
+admin.delete('/platillos/:id/foto', ruta(async (req, res) => {
+  const platilloId = id(req.params.id)
+  const anterior = uno('SELECT foto FROM platillos WHERE id = ?', platilloId)
+  if (!anterior) throw new ErrorHttp(404, 'Platillo no encontrado')
+  const platillo = uno(
+    "UPDATE platillos SET foto = NULL, actualizado = datetime('now') WHERE id = ? RETURNING *",
+    platilloId,
+  )
+  await borrarFoto(anterior.foto)
+  res.json(aPlatillo(platillo))
+}))
 
 admin.post('/categorias', (req, res) => {
   const b = req.body ?? {}
@@ -148,12 +186,16 @@ admin.patch('/categorias/:id', (req, res) => {
   }))
 })
 
-admin.delete('/categorias/:id', (req, res) => {
-  if (!ejecutar('DELETE FROM categorias WHERE id = ?', id(req.params.id)).changes) {
+admin.delete('/categorias/:id', ruta(async (req, res) => {
+  const categoriaId = id(req.params.id)
+  // Los platillos se borran en cascada; antes guardamos sus fotos para quitarlas del disco
+  const fotos = todos('SELECT foto FROM platillos WHERE categoria_id = ? AND foto IS NOT NULL', categoriaId)
+  if (!ejecutar('DELETE FROM categorias WHERE id = ?', categoriaId).changes) {
     throw new ErrorHttp(404, 'Categoría no encontrada')
   }
+  await Promise.all(fotos.map((f) => borrarFoto(f.foto)))
   res.status(204).end()
-})
+}))
 
 admin.put('/password', ruta(async (req, res) => {
   const { actual, nueva } = req.body ?? {}
@@ -179,6 +221,7 @@ if (existsSync(dist)) {
 }
 
 app.use((err, _req, res, _next) => {
+  if (err.type === 'entity.too.large') return res.status(413).json({ error: 'La foto es demasiado grande (máximo 15 MB)' })
   if (err.status) return res.status(err.status).json({ error: err.message })
   if (/FOREIGN KEY constraint failed/.test(err.message)) {
     return res.status(400).json({ error: 'La categoría indicada no existe' })

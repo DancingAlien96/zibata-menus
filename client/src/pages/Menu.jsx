@@ -6,6 +6,7 @@ export default function Menu() {
   const { slug } = useParams()
   const [menu, setMenu] = useState(null)
   const [error, setError] = useState(null)
+  const [ampliada, setAmpliada] = useState(null)
 
   useEffect(() => {
     let vigente = true
@@ -53,16 +54,23 @@ export default function Menu() {
             <h2>{c.nombre}</h2>
             <ul>
               {c.platillos.map((p) => (
-                <li key={p.id} className="platillo">
-                  <div className="linea">
-                    <span className="nombre">{p.nombre}</span>
-                    <span className="puntos" aria-hidden="true" />
-                    <span className="precio">{quetzales(p.precio)}</span>
-                    {p.precio_doble != null && (
-                      <span className="precio doble" title="Promoción 2 por">2x {quetzales(p.precio_doble)}</span>
-                    )}
+                <li key={p.id} className={`platillo ${p.foto ? 'con-foto' : ''}`}>
+                  {p.foto && (
+                    <button className="foto-mini" onClick={() => setAmpliada(p)} aria-label={`Ver foto de ${p.nombre}`}>
+                      <img src={p.foto_mini} alt="" loading="lazy" decoding="async" width="240" height="240" />
+                    </button>
+                  )}
+                  <div className="texto">
+                    <div className="linea">
+                      <span className="nombre">{p.nombre}</span>
+                      <span className="puntos" aria-hidden="true" />
+                      <span className="precio">{quetzales(p.precio)}</span>
+                      {p.precio_doble != null && (
+                        <span className="precio doble" title="Promoción 2 por">2x {quetzales(p.precio_doble)}</span>
+                      )}
+                    </div>
+                    {p.descripcion && <p className="descripcion">{p.descripcion}</p>}
                   </div>
-                  {p.descripcion && <p className="descripcion">{p.descripcion}</p>}
                 </li>
               ))}
             </ul>
@@ -76,6 +84,34 @@ export default function Menu() {
           </footer>
         )}
       </main>
+
+      {ampliada && <FotoAmpliada platillo={ampliada} onCerrar={() => setAmpliada(null)} />}
+    </div>
+  )
+}
+
+function FotoAmpliada({ platillo, onCerrar }) {
+  useEffect(() => {
+    const cerrarConEsc = (e) => e.key === 'Escape' && onCerrar()
+    document.addEventListener('keydown', cerrarConEsc)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', cerrarConEsc)
+      document.body.style.overflow = ''
+    }
+  }, [onCerrar])
+
+  return (
+    <div className="visor" role="dialog" aria-modal="true" aria-label={platillo.nombre} onClick={onCerrar}>
+      <figure className="visor-marco" onClick={(e) => e.stopPropagation()}>
+        <img src={platillo.foto} alt={platillo.nombre} />
+        <figcaption>
+          <strong>{platillo.nombre}</strong>
+          <span>{quetzales(platillo.precio)}</span>
+          {platillo.descripcion && <em>{platillo.descripcion}</em>}
+        </figcaption>
+        <button className="visor-cerrar" onClick={onCerrar} aria-label="Cerrar">×</button>
+      </figure>
     </div>
   )
 }
